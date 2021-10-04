@@ -1,5 +1,5 @@
 import React, { Component } from "react";
-import { API } from 'aws-amplify';
+import { API, Auth } from 'aws-amplify';
 import { Storage } from 'aws-amplify';
 import { withRouter } from "react-router-dom";
 import DataGrid from 'react-data-grid';
@@ -10,8 +10,14 @@ class FileRetrieve extends Component {
         files: [], folders: {}
     }
 
-    componentDidMount() {
-        API.get("pouch-api", "/userdata")
+    async componentDidMount() {
+        const myInit = { 
+            headers: { 
+              Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
+            },
+          };
+
+        API.get("pouch-api", "/userdata", myInit)
         .then(data => console.log("data from backend",data))
         .catch(err=>{
             console.log("err", err)
