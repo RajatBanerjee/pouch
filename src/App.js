@@ -10,12 +10,6 @@ import File from './File';
 import { Container, Navbar, Nav, NavDropdown } from 'react-bootstrap';
 import { HashRouter, Switch, Route } from "react-router-dom";
 Amplify.configure(awsconfig);
-Amplify.API= [
-        {
-          name: "pouch-backend",
-          endpoint: "https://gpa81z32da.execute-api.us-west-1.amazonaws.com"
-        }
-    ]
   
 const AuthStateApp = () => {
   const [authState, setAuthState] = React.useState();

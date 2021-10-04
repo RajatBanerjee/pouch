@@ -11,7 +11,7 @@ class FileRetrieve extends Component {
     }
 
     componentDidMount() {
-        API.get("pouch-backend", "/")
+        API.get("pouch-api", "/userdata")
         .then(data => console.log("data from backend",data))
         .catch(err=>{
             console.log("err", err)
