@@ -43,7 +43,7 @@ class FileUpload extends Component {
                             </Form.Group>
                         </Col>
                         <Col md={{ span: 2, offset: 0 }}>
-                            <Button  variant="danger" className="btnUploadContainer" disabled={this.state.dlBtnDisabled}>Upload</Button>
+                            <Button  variant="danger" className="btnUploadContainer" disabled={this.state.dlBtnDisabled} onClick={this.saveFile}>Upload</Button>
                         </Col>
                     </Row>
                     <Row >

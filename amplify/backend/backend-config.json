@@ -1,13 +1,89 @@
 {
+  "function": {
+    "pouche678cc21e678cc21PostConfirmation": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "AdminQueries6afffbdb": {
+      "service": "Lambda",
+      "providerPlugin": "awscloudformation",
+      "build": true,
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "pouche678cc21e678cc21",
+          "attributes": [
+            "UserPoolId"
+          ]
+        }
+      ]
+    },
+    "pouchinsertuserdata": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "pouchretrieveUserData": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda",
+      "dependsOn": [
+        {
+          "category": "storage",
+          "resourceName": "pouchstorage",
+          "attributes": [
+            "BucketName"
+          ]
+        }
+      ]
+    },
+    "pouchupdateUserData": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    },
+    "pouchDeleteUserData": {
+      "build": true,
+      "providerPlugin": "awscloudformation",
+      "service": "Lambda"
+    }
+  },
   "auth": {
-    "pouchweb9b7170bb": {
+    "userPoolGroups": {
+      "service": "Cognito-UserPool-Groups",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "pouche678cc21e678cc21",
+          "attributes": [
+            "UserPoolId",
+            "AppClientIDWeb",
+            "AppClientID",
+            "IdentityPoolId"
+          ]
+        }
+      ]
+    },
+    "pouche678cc21e678cc21": {
       "service": "Cognito",
       "providerPlugin": "awscloudformation",
-      "dependsOn": [],
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "pouche678cc21e678cc21PostConfirmation",
+          "triggerProvider": "Cognito",
+          "attributes": [
+            "Arn",
+            "Name"
+          ]
+        }
+      ],
       "customAuth": false,
       "frontendAuthConfig": {
         "loginMechanisms": [
-          "PREFERRED_USERNAME"
+          "EMAIL"
         ],
         "signupAttributes": [
           "EMAIL",
@@ -26,38 +102,6 @@
           "EMAIL"
         ]
       }
-    },
-    "userPoolGroups": {
-      "service": "Cognito-UserPool-Groups",
-      "providerPlugin": "awscloudformation",
-      "dependsOn": [
-        {
-          "category": "auth",
-          "resourceName": "pouchweb9b7170bb",
-          "attributes": [
-            "UserPoolId",
-            "AppClientIDWeb",
-            "AppClientID",
-            "IdentityPoolId"
-          ]
-        }
-      ]
-    }
-  },
-  "function": {
-    "AdminQueries72feabd8": {
-      "service": "Lambda",
-      "providerPlugin": "awscloudformation",
-      "build": true,
-      "dependsOn": [
-        {
-          "category": "auth",
-          "resourceName": "pouchweb9b7170bb",
-          "attributes": [
-            "UserPoolId"
-          ]
-        }
-      ]
     }
   },
   "api": {
@@ -68,26 +112,87 @@
       "dependsOn": [
         {
           "category": "auth",
-          "resourceName": "pouchweb9b7170bb",
+          "resourceName": "pouche678cc21e678cc21",
           "attributes": [
             "UserPoolId"
           ]
         },
         {
           "category": "function",
-          "resourceName": "AdminQueries72feabd8",
+          "resourceName": "AdminQueries6afffbdb",
           "attributes": [
             "Arn",
             "Name"
           ]
         }
       ]
+    },
+    "api8dc0bcdb": {
+      "service": "API Gateway",
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "function",
+          "resourceName": "pouchinsertuserdata",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "pouchretrieveUserData",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "pouchupdateUserData",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        },
+        {
+          "category": "function",
+          "resourceName": "pouchDeleteUserData",
+          "attributes": [
+            "Name",
+            "Arn"
+          ]
+        }
+      ]
     }
   },
   "storage": {
-    "s3ffd976e4": {
+    "pouchstorage": {
       "service": "S3",
-      "providerPlugin": "awscloudformation"
+      "providerPlugin": "awscloudformation",
+      "dependsOn": [
+        {
+          "category": "auth",
+          "resourceName": "pouche678cc21e678cc21",
+          "attributes": [
+            "UserPoolId"
+          ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "userPoolGroups",
+          "attributes": [
+            "userGroupRole"
+          ]
+        },
+        {
+          "category": "auth",
+          "resourceName": "userPoolGroups",
+          "attributes": [
+            "adminGroupRole"
+          ]
+        }
+      ]
     }
   }
 }

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+import { API } from 'aws-amplify';
 import { Storage } from 'aws-amplify';
 import { withRouter } from "react-router-dom";
 import DataGrid from 'react-data-grid';
@@ -6,26 +7,17 @@ import DataGrid from 'react-data-grid';
 
 class FileRetrieve extends Component {
     state = {
-        files: [{
-            key: "Dracula.itermcolors.txt",
-            eTag: "\"6ba556563f8b8b89cc54a4e7df8ed34d\"",
-            lastModified: "2021-10-03T02:47:28.000Z",
-            size: 5183
-        }, {
-            key: "UCP_Colleges_Welcome.xlsx",
-            eTag: "\"9e4b7c482fb17dda1c331044c42631b1\"",
-            lastModified: "2021-10-03T02:47:38.000Z",
-            size: 108813
-        },
-        {
-            key: "Dracula.itermcolors.txt",
-            eTag: "\"6ba556563f8b8b89cc54a4e7df8ed34d\"",
-            lastModified: "2021-10-03T02:47:28.000Z",
-            size: 5183
-        }], folders: {}
+        files: [], folders: {}
     }
 
     componentDidMount() {
+        API.get("pouch-backend", "/")
+        .then(data => console.log("data from backend",data))
+        .catch(err=>{
+            console.log("err", err)
+        });
+        
+        
             Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
         .then(result => { 
             this.processStorageList(result)

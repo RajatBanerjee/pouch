@@ -1,23 +1,23 @@
 {
     "AWSTemplateFormatVersion": "2010-09-09",
     "Parameters": {
-        "authpouchweb9b7170bbUserPoolId": {
+        "authpouche678cc21e678cc21UserPoolId": {
             "Type": "String",
-            "Default": "authpouchweb9b7170bbUserPoolId"
+            "Default": "authpouche678cc21e678cc21UserPoolId"
         },
         
-        "authpouchweb9b7170bbIdentityPoolId": {
+        "authpouche678cc21e678cc21IdentityPoolId": {
             "Type": "String",
-            "Default": "authpouchweb9b7170bbIdentityPoolId"
+            "Default": "authpouche678cc21e678cc21IdentityPoolId"
         },
         
-        "authpouchweb9b7170bbAppClientID": {
+        "authpouche678cc21e678cc21AppClientID": {
             "Type": "String",
-            "Default": "authpouchweb9b7170bbAppClientID"
+            "Default": "authpouche678cc21e678cc21AppClientID"
         },
-        "authpouchweb9b7170bbAppClientIDWeb": {
+        "authpouche678cc21e678cc21AppClientIDWeb": {
             "Type": "String",
-            "Default": "authpouchweb9b7170bbAppClientIDWeb"
+            "Default": "authpouche678cc21e678cc21AppClientIDWeb"
         },
         "AuthRoleArn": {
             "Type": "String"
@@ -55,7 +55,7 @@
               },
               
               "UserPoolId" : {
-                "Ref": "authpouchweb9b7170bbUserPoolId"
+                "Ref": "authpouche678cc21e678cc21UserPoolId"
               }
             }
         },
@@ -68,7 +68,7 @@
                         "",
                         [
                           {
-                            "Ref": "authpouchweb9b7170bbUserPoolId"
+                            "Ref": "authpouche678cc21e678cc21UserPoolId"
                           },
                           "-userGroupRole"
                         ]
@@ -85,7 +85,61 @@
                             },
                             "Action": "sts:AssumeRoleWithWebIdentity",
                             "Condition": {
-                              "StringEquals": {"cognito-identity.amazonaws.com:aud": {"Ref":"authpouchweb9b7170bbIdentityPoolId"}},
+                              "StringEquals": {"cognito-identity.amazonaws.com:aud": {"Ref":"authpouche678cc21e678cc21IdentityPoolId"}},
+                              "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "authenticated"}
+                            }
+                        }
+                    ]
+                }
+            }
+        },
+     
+    
+        "adminGroup": {
+          "Type" : "AWS::Cognito::UserPoolGroup",
+          "Properties" : {
+              "GroupName" : "admin",
+              "Precedence" : 2,
+              
+              "RoleArn" : {
+                "Fn::GetAtt": [
+                    "adminGroupRole",
+                    "Arn"
+                ]
+              },
+              
+              "UserPoolId" : {
+                "Ref": "authpouche678cc21e678cc21UserPoolId"
+              }
+            }
+        },
+        
+        "adminGroupRole": {
+            "Type": "AWS::IAM::Role",
+            "Properties": {
+                "RoleName":{
+                    "Fn::Join": [
+                        "",
+                        [
+                          {
+                            "Ref": "authpouche678cc21e678cc21UserPoolId"
+                          },
+                          "-adminGroupRole"
+                        ]
+                    ]
+                },
+                "AssumeRolePolicyDocument": {
+                    "Version": "2012-10-17",
+                    "Statement": [
+                        {
+                            "Sid": "",
+                            "Effect": "Allow",
+                            "Principal": {
+                                "Federated": "cognito-identity.amazonaws.com"
+                            },
+                            "Action": "sts:AssumeRoleWithWebIdentity",
+                            "Condition": {
+                              "StringEquals": {"cognito-identity.amazonaws.com:aud": {"Ref":"authpouche678cc21e678cc21IdentityPoolId"}},
                               "ForAnyValue:StringLike": {"cognito-identity.amazonaws.com:amr": "authenticated"}
                             }
                         }
@@ -111,7 +165,7 @@
                                 "",
                                 [
 
-                                  "pouchweb9b7170bb",
+                                  "pouche678cc21e678cc21",
                                   "-ExecutionRole-",
                                   {
                                     "Ref": "env"
@@ -272,16 +326,16 @@
                     "Ref": "UnauthRoleArn"
                 },
                 "identityPoolId": {
-                    "Ref": "authpouchweb9b7170bbIdentityPoolId"
+                    "Ref": "authpouche678cc21e678cc21IdentityPoolId"
                 },
                 "userPoolId": {
-                    "Ref": "authpouchweb9b7170bbUserPoolId"
+                    "Ref": "authpouche678cc21e678cc21UserPoolId"
                 },
                 "appClientIDWeb": {
-                    "Ref": "authpouchweb9b7170bbAppClientIDWeb"
+                    "Ref": "authpouche678cc21e678cc21AppClientIDWeb"
                 },
                 "appClientID": {
-                    "Ref": "authpouchweb9b7170bbAppClientID"
+                    "Ref": "authpouche678cc21e678cc21AppClientID"
                 },
                 "region": {
                     "Ref": "AWS::Region"
@@ -301,6 +355,17 @@
             "Value": {
                 "Fn::GetAtt": [
                     "userGroupRole",
+                    "Arn"
+                ]
+            }
+        
+        },
+        
+      
+        "adminGroupRole": {
+            "Value": {
+                "Fn::GetAtt": [
+                    "adminGroupRole",
                     "Arn"
                 ]
             }
