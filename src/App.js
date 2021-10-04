@@ -22,6 +22,7 @@ const AuthStateApp = () => {
     });
   }, []);
 
+  console.log("user==>", user)
   return authState === AuthState.SignedIn && user ? (
     <>
       <Navbar className="mainNav navbar navbar-expand-lg bg-secondary text-uppercase fixed-top" expand="lg">
@@ -32,7 +33,7 @@ const AuthStateApp = () => {
             <Nav.Link className="nav-link py-3 px-0 px-lg-3 rounded" href="/admin">Admin</Nav.Link>
           </Nav>
           <Navbar.Collapse className="justify-content-end">
-          <NavDropdown title={user.username} id="basic-nav-dropdown">
+          <NavDropdown title={user.attributes.email} id="basic-nav-dropdown">
             <NavDropdown.Item href="#action/3.1">
             <AmplifySignOut /></NavDropdown.Item>
             </NavDropdown>

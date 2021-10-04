@@ -11,25 +11,37 @@ class FileRetrieve extends Component {
     }
 
     async componentDidMount() {
-        const myInit = { 
-            headers: { 
-              Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
+        let user = await Auth.currentAuthenticatedUser();
+
+
+        const myInit = {
+            headers: {
+                Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
             },
-          };
+        };
 
-        API.get("pouch-api", "/userdata", myInit)
-        .then(data => console.log("data from backend",data))
-        .catch(err=>{
-            console.log("err", err)
-        });
-        
-        
-            Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
-        .then(result => { 
-            this.processStorageList(result)
+        try {
+            var dbData = await API.get("pouch-api", "/userdata", myInit)
+            console.log("db data ==>", dbData)
+        } catch (err) {
+            console.error(err)
+        }
+
+        try {
+           var result = await Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
+
+        } catch (err) {
+            console.error(err)
+        }
+
+        result.map(r =>{
+          let f = dbData.find( (d) => {return d.fileName == r.key})
+           r.uploadedOn = f.insTs
+           r.uploadedBy = user.attributes.email
+
+           return r
         })
-        .catch(err => console.log(err));
-
+        this.processStorageList(result)
 
     }
 
@@ -51,15 +63,15 @@ class FileRetrieve extends Component {
     }
     handleClick = (row) => {
         console.log(row)
-        this.props.history.push("file?key="+row.key+"&lastUpdatedAt="+row.lastModified+"&uploadedBy=");
+        this.props.history.push("file?key=" + row.key + "&lastUpdatedAt=" + row.lastModified + "&uploadedBy=");
     }
 
     render() {
         const columns = [
             { key: 'key', name: 'File Name' },
             { key: 'lastModified', name: 'Last Modified' },
-            { key: '', name: 'Uploaded By' },
-            { key: '', name: 'Uploadedd On' },
+            { key: 'uploadedBy', name: 'Uploaded By' },
+            { key: 'uploadedOn', name: 'Uploadedd On' },
             { key: 'size', name: 'size' },
             { key: 'eTag', name: 'etag' },
         ];
