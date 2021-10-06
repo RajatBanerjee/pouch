@@ -11,6 +11,10 @@ class FileRetrieve extends Component {
     }
 
     async componentDidMount() {
+        this.getFiles()
+    }
+    
+    async getFiles() {
         let user = await Auth.currentAuthenticatedUser();
 
 
@@ -28,21 +32,21 @@ class FileRetrieve extends Component {
         }
 
         try {
-           var result = await Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
+            var result = await Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
 
         } catch (err) {
             console.error(err)
         }
 
-        result.map(r =>{
-          let f = dbData.find( (d) => {return d.fileName == r.key})
-           r.uploadedOn = f.insTs
-           r.uploadedBy = user.attributes.email
+        result.map(r => {
+            let f = dbData.find((d) => { return d.fileName == r.key })
+            r.id = f.id
+            r.uploadedOn = f.insTs
+            r.uploadedBy = user.attributes.email
 
-           return r
+            return r
         })
         this.processStorageList(result)
-
     }
 
     processStorageList(result) {
@@ -63,11 +67,12 @@ class FileRetrieve extends Component {
     }
     handleClick = (row) => {
         console.log(row)
-        this.props.history.push("file?key=" + row.key + "&lastUpdatedAt=" + row.lastModified + "&uploadedBy=");
+        this.props.history.push("file?id=" + row.id);
     }
 
     render() {
         const columns = [
+            { key: 'id', name: 'Id' },
             { key: 'key', name: 'File Name' },
             { key: 'lastModified', name: 'Last Modified' },
             { key: 'uploadedBy', name: 'Uploaded By' },

@@ -1,4 +1,5 @@
 import React, { Component } from "react";
+
 import { API, Auth, Storage } from 'aws-amplify';
 import { Row, Form, Container, Button, Col } from 'react-bootstrap';
 
@@ -27,10 +28,12 @@ class FileUpload extends Component {
     }
 
     async insertIntoDb() {
+        
         let timeStr = new Date().toUTCString()
 
         let fileData = {
             userId: this.state.user.attributes.sub,
+            userName :this.state.user.attributes.email,
             fileName: this.state.fileName,
             insTs:timeStr ,
             updTs: timeStr,
@@ -45,7 +48,10 @@ class FileUpload extends Component {
         };
 
         API.post("pouch-api", "/userdata", myInit)
-            .then(data => console.log("data from backend", data))
+            .then(data =>  {
+                console.log("data from backend", data)
+                window.location.reload();
+            })
             .catch(err => {
                 console.log("err", err)
             });
