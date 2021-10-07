@@ -7,15 +7,25 @@ import DataGrid from 'react-data-grid';
 
 class FileRetrieve extends Component {
     state = {
-        files: [], folders: {}
+        files: [], folders: {}, user: {}, isAdmin:false
     }
 
     async componentDidMount() {
-        this.getFiles()
-    }
-    
-    async getFiles() {
         let user = await Auth.currentAuthenticatedUser();
+        let groups = user.signInUserSession.accessToken.payload["cognito:groups"]
+        if (groups.length >0) {
+            if (groups[0] == "administrators") {
+                var isAdmin = true
+            }
+        }
+        
+
+        this.setState({ user, isAdmin }, () => {
+            this.getFiles()
+        })
+    }
+
+    async getFiles() {
 
 
         const myInit = {
@@ -23,38 +33,84 @@ class FileRetrieve extends Component {
                 Authorization: `Bearer ${(await Auth.currentSession()).getIdToken().getJwtToken()}`,
             },
         };
+        var query = "?id=" + this.state.user.attributes.sub
+        if (this.state.isAdmin) {
+            query = ""
+        }
 
         try {
-            var dbData = await API.get("pouch-api", "/userdata", myInit)
+            var dbData = await API.get("pouch-api", "/userdata" + query, myInit)
             console.log("db data ==>", dbData)
         } catch (err) {
             console.error(err)
         }
 
-        try {
-            var result = await Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
+        var result = []
+        /**** get s3 files */
+        if (this.state.isAdmin) {
+            try {
+                result = await API.get("pouch-api", "/admin", myInit)
+               result =  this.toCamel(result.body.Contents)
+               console.log("result ==>", result)
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        else {
 
-        } catch (err) {
-            console.error(err)
+            try {
+                result = await Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
+                console.log("result ==>", result)
+            } catch (err) {
+                console.error(err)
+            }
         }
 
         result.map(r => {
-            let f = dbData.find((d) => { return d.fileName == r.key })
+            let f = dbData.find((d) => { return  r.key.indexOf(d.fileName) >0 })
             r.id = f.id
+            r.fileName = f.fileName
             r.uploadedOn = f.insTs
-            r.uploadedBy = user.attributes.email
+            r.uploadedBy = f.userName
 
             return r
         })
         this.processStorageList(result)
     }
 
+
+    toCamel = (o) => {
+        var that = this
+        var newO, origKey, newKey, value
+        if (o instanceof Array) {
+          return o.map(function(value) {
+              if (typeof value === "object") {
+                value = that.toCamel(value)
+              }
+              return value
+          })
+        } else {
+          newO = {}
+          for (origKey in o) {
+            if (o.hasOwnProperty(origKey)) {
+              newKey = (origKey.charAt(0).toLowerCase() + origKey.slice(1) || origKey).toString()
+              value = o[origKey]
+              if (value instanceof Array || (value !== null && value.constructor === Object)) {
+                value = that.toCamel(value)
+              }
+              newO[newKey] = value
+            }
+          }
+        }
+        return newO
+      }
+
     processStorageList(result) {
         let files = []
         let folders = new Set()
         result.forEach(res => {
             if (res.size) {
-                res.lastModified = res.lastModified.toUTCString()
+                res.lastModified = typeof(res.lastModified) =='function?' ? res.lastModified.toUTCString(): res.lastModified
                 files.push(res)
                 // sometimes files declare a folder with a / within then
                 let possibleFolder = res.key.split('/').slice(0, -1).join('/')
@@ -73,7 +129,7 @@ class FileRetrieve extends Component {
     render() {
         const columns = [
             { key: 'id', name: 'Id' },
-            { key: 'key', name: 'File Name' },
+            { key: 'fileName', name: 'File Name' },
             { key: 'lastModified', name: 'Last Modified' },
             { key: 'uploadedBy', name: 'Uploaded By' },
             { key: 'uploadedOn', name: 'Uploadedd On' },
