@@ -7,11 +7,10 @@ import DataGrid from 'react-data-grid';
 
 class FileRetrieve extends Component {
     state = {
-        files: [], folders: {}, user: {}
+        files: [], folders: {}, user: {}, isAdmin:false
     }
 
     async componentDidMount() {
-        
         let user = await Auth.currentAuthenticatedUser();
         let groups = user.signInUserSession.accessToken.payload["cognito:groups"]
         if (groups.length >0) {
@@ -24,7 +23,6 @@ class FileRetrieve extends Component {
         this.setState({ user, isAdmin }, () => {
             this.getFiles()
         })
-        
     }
 
     async getFiles() {
@@ -36,7 +34,9 @@ class FileRetrieve extends Component {
             },
         };
         var query = "?id=" + this.state.user.attributes.sub
-       
+        if (this.state.isAdmin) {
+            query = ""
+        }
 
         try {
             var dbData = await API.get("pouch-api", "/userdata" + query, myInit)
@@ -47,28 +47,34 @@ class FileRetrieve extends Component {
 
         var result = []
         /**** get s3 files */
-        
+        if (this.state.isAdmin) {
+            try {
+                result = await API.get("pouch-api", "/admin", myInit)
+               result =  this.toCamel(result.Contents)
+               console.log("result ==>", result)
+            } catch (err) {
+                console.error(err)
+            }
+        }
+        else {
+
             try {
                 result = await Storage.list('', { level: 'private' }) // for listing ALL files without prefix, pass '' instead
                 console.log("result ==>", result)
             } catch (err) {
                 console.error(err)
             }
-
+        }
 
         result.map(r => {
-            let f = dbData.find((d) => { return  r.key.indexOf(d.fileName) >0 || d.fileName == r.key })
+            let f = dbData.find((d) => { return  r.key.indexOf(d.fileName) >0 })
             r.id = f.id
             r.fileName = f.fileName
             r.uploadedOn = f.insTs
             r.uploadedBy = f.userName
-            r.lastModified = typeof(r.lastModified) =='object' ? r.lastModified.toUTCString(): r.lastModified
 
             return r
         })
-
-
-        console.log("updated result ==>", result)
         this.processStorageList(result)
     }
 
@@ -104,7 +110,7 @@ class FileRetrieve extends Component {
         let folders = new Set()
         result.forEach(res => {
             if (res.size) {
-                
+                res.lastModified = typeof(res.lastModified) =='function?' ? res.lastModified.toUTCString(): res.lastModified
                 files.push(res)
                 // sometimes files declare a folder with a / within then
                 let possibleFolder = res.key.split('/').slice(0, -1).join('/')
