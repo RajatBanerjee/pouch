@@ -1,0 +1,26 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-pouchweb-dev-04534-authRole",
+      "UnauthRoleArn": "arn:aws:iam::257633160470:role/amplify-pouchweb-dev-04534-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::257633160470:role/amplify-pouchweb-dev-04534-authRole",
+      "Region": "us-west-1",
+      "DeploymentBucketName": "amplify-pouchweb-dev-04534-deployment",
+      "UnauthRoleName": "amplify-pouchweb-dev-04534-unauthRole",
+      "StackName": "amplify-pouchweb-dev-04534",
+      "StackId": "arn:aws:cloudformation:us-west-1:257633160470:stack/amplify-pouchweb-dev-04534/8c99cdb0-30b0-11ec-8053-06e22edd8b3b",
+      "AmplifyAppId": "d2huxxit0zdawl"
+    },
+    "categories": {
+      "auth": {
+        "pouchwebbb259aabbb259aab": {}
+      },
+      "function": {
+        "AdminQueriese4c56e0c": {
+          "deploymentBucketName": "amplify-pouchweb-dev-04534-deployment",
+          "s3Key": "amplify-builds/AdminQueriese4c56e0c-57784e624672616f6559-build.zip"
+        }
+      }
+    }
+  }
+}
