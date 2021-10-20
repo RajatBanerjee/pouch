@@ -20,9 +20,10 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import AccountCircle from '@mui/icons-material/AccountCircle';
 import { AmplifySignOut } from '@aws-amplify/ui-react';
-import { mainListItems } from './listItems';
-import Orders from './Files';
+import { MainListItems } from './listItems';
+import Files from './Files';
 import  FileUpload  from './FileUpload';
+import AdminFiles from './AdminFiles';
 
 function Copyright(props) {
   return (
@@ -36,7 +37,6 @@ function Copyright(props) {
     </Typography>
   );
 }
-const user ="Rajat@fanatics.com"
 
 const drawerWidth = 240;
 
@@ -86,9 +86,11 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 const mdTheme = createTheme();
 
-function DashboardContent() {
+export default function DashboardContent(props) {
+  console.log("props into dash == >", props)
   const [open, setOpen] = React.useState(true);
   const [anchorEl, setAnchorEl] = React.useState(null);
+  const [user] = React.useState(props.user);
 
   const toggleDrawer = () => {
     setOpen(!open);
@@ -133,7 +135,6 @@ function DashboardContent() {
             >
               Pouch
             </Typography>
-            {1 && (
             <div>
               <IconButton
                 size="large"
@@ -143,7 +144,7 @@ function DashboardContent() {
                 onClick={handleMenu}
                 color="inherit"
               > <Typography color="text.primary" sx={{ flex: 1 }}>
-              on 15 March, 2019
+                {user.attributes.given_name}{props.isAdmin?('(admin)'):null}
             </Typography>
                 <AccountCircle />
               </IconButton>
@@ -165,7 +166,6 @@ function DashboardContent() {
                 <AmplifySignOut />
               </Menu>
             </div>
-          )}
           </Toolbar>
         </AppBar>
         <Drawer variant="permanent" open={open}>
@@ -182,7 +182,7 @@ function DashboardContent() {
             </IconButton>
           </Toolbar>
           <Divider />
-          <List>{mainListItems}</List>
+          <List><MainListItems isAdmin={props.isAdmin}></MainListItems></List>
         </Drawer>
         <Box
           component="main"
@@ -197,7 +197,7 @@ function DashboardContent() {
           }}
         >
           <Toolbar />
-          <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+          <Container maxWidth="" sx={{ mt: 4, mb: 4 }}>
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <Paper
@@ -208,13 +208,16 @@ function DashboardContent() {
                     height: 240,
                   }}
                 >
-                <FileUpload></FileUpload>
+                <FileUpload user={user}></FileUpload>
                 </Paper>
               </Grid>
 
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
-                  <Orders />
+                  {props.isAdminMode  === true ?
+                  <AdminFiles user={user} isAdmin={props.isAdmin}></AdminFiles> :
+                  <Files user={user} />
+                  }
                 </Paper>
               </Grid>
             </Grid>
@@ -224,8 +227,4 @@ function DashboardContent() {
       </Box>
     </ThemeProvider>
   );
-}
-
-export default function Dashboard() {
-  return <DashboardContent />;
 }
